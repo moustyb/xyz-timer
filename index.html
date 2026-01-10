@@ -3,20 +3,161 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zen Timer</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Zen Timer & Breathing</title>
+  <style>
+    /* --- CSS STYLES --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(135deg, #0f1115 0%, #1a1d25 100%);
+      color: #e0e0e0;
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Prevents scrollbars if font gets huge */
+    }
+
+    .container { 
+      text-align: center; 
+      width: 100%;
+      max-width: 800px; /* Increased width to allow for bigger font */
+      padding: 1rem; 
+    }
+
+    .timer {
+      /* UPDATED: Massive font size */
+      font-size: 8rem; 
+      font-weight: 200; /* Thinner font looks cleaner at large sizes */
+      line-height: 1.1;
+      margin: 1rem 0;
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      font-variant-numeric: tabular-nums; 
+    }
+
+    .phase {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #a0a0a0;
+      min-height: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 1rem;
+    }
+
+    /* Preset Buttons Area */
+    .presets {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .preset-btn {
+      background: rgba(30, 35, 45, 0.7);
+      border: 1px solid rgba(60, 70, 90, 0.5);
+      color: #c0c0c0;
+      padding: 0.8rem 1.4rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .preset-btn:hover { background: rgba(40, 45, 55, 0.8); color: #e0e0e0; }
+    .preset-btn.active { background: #2d4a6e; border-color: #4a7ab5; color: white; }
+
+    /* Custom Input Area */
+    .custom-area {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    .custom-input {
+      background: rgba(30, 35, 45, 0.7);
+      border: 1px solid rgba(60, 70, 90, 0.5);
+      color: #fff;
+      padding: 0.8rem;
+      border-radius: 12px;
+      width: 100px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    /* Remove spinners from number input */
+    .custom-input::-webkit-outer-spin-button,
+    .custom-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* Controls (Play/Reset) */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 2rem;
+    }
+
+    .control-btn {
+      width: 70px; /* Larger buttons */
+      height: 70px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 35, 45, 0.7);
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover { background: rgba(40, 45, 55, 0.9); transform: scale(1.05); }
+    .control-btn svg { fill: #e0e0e0; width: 32px; height: 32px; } /* Larger icons */
+
+    .start-btn { background: #2d4a6e; }
+    .start-btn:hover { background: #3a5a7e; }
+
+    .instructions {
+      margin-top: 3rem;
+      color: #5d6675;
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      /* On mobile/tablets, use Viewport Width (vw) so it's always HUGE but fits */
+      .timer { 
+        font-size: 18vw; 
+      }
+      
+      .preset-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+      .container { padding: 1rem; }
+    }
+  </style>
 </head>
 <body>
+
   <div class="container">
     <div class="phase" id="phase">Select a practice</div>
+    
     <div class="timer" id="timer">00:00</div>
 
     <div class="presets" id="presets">
-      <button class="preset-btn" data-mode="boxBreathing">Box Breathing</button>
-      <button class="preset-btn" data-mode="478">4-7-8 Breathing</button>
-      <button class="preset-btn" data-mode="5min">5 Min</button>
-      <button class="preset-btn" data-mode="10min">10 Min</button>
-      <button class="preset-btn" data-mode="20min">20 Min</button>
+      <button class="preset-btn" data-type="breathing" data-mode="boxBreathing">Box Breathing</button>
+      <button class="preset-btn" data-type="breathing" data-mode="478">4-7-8 Breathing</button>
+      <button class="preset-btn" data-type="timer" data-time="300">5 Min</button>
+      <button class="preset-btn" data-type="timer" data-time="1200">20 Min</button>
+    </div>
+
+    <div class="custom-area">
+      <input type="number" id="customHours" class="custom-input" placeholder="Hours" min="1" max="99">
+      <button class="preset-btn" id="setCustomBtn">Set Hours</button>
     </div>
 
     <div class="controls">
@@ -26,7 +167,6 @@
         </svg>
       </button>
       <button class="control-btn start-btn" id="startBtn" aria-label="Start/Pause">
-        <!-- Play icon -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7z"/>
         </svg>
@@ -34,11 +174,217 @@
     </div>
 
     <div class="instructions">
-      A distraction-free space for mindful moments.  
-      Select a preset, then tap the play button to begin.
+      Select a preset or enter custom hours. Tap play to begin.
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // --- JAVASCRIPT LOGIC ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const timerDisplay = document.getElementById('timer');
+      const phaseDisplay = document.getElementById('phase');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const presetButtons = document.querySelectorAll('.preset-btn[data-mode], .preset-btn[data-time]');
+      const customInput = document.getElementById('customHours');
+      const setCustomBtn = document.getElementById('setCustomBtn');
+
+      let intervalId = null;
+      let timeLeft = 0;
+      let isRunning = false;
+      
+      // Configuration state
+      let currentModeType = null; // 'timer' or 'breathing'
+      let breathingConfig = null; // Holds the array for breathing intervals
+      let breathingIndex = 0;     // Which step of the breathing cycle are we on?
+
+      // Icons
+      const icons = {
+        play: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
+        pause: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 19H6V5h8v14zM8 7v10h4V7H8z"/></svg>`
+      };
+
+      // Breathing Techniques Data
+      const techniques = {
+        boxBreathing: {
+          name: "Box Breathing",
+          intervals: [
+            { phase: "Inhale", time: 4 },
+            { phase: "Hold", time: 4 },
+            { phase: "Exhale", time: 4 },
+            { phase: "Hold", time: 4 }
+          ]
+        },
+        '478': {
+          name: "4-7-8 Breathing",
+          intervals: [
+            { phase: "Inhale", time: 4 },
+            { phase: "Hold", time: 7 },
+            { phase: "Exhale", time: 8 }
+          ]
+        }
+      };
+
+      // Helper: Format Seconds into HH:MM:SS or MM:SS
+      const formatTime = (totalSeconds) => {
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
+
+        // If we have hours, show HH:MM:SS, otherwise MM:SS
+        if (h > 0) {
+          return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      };
+
+      const updateDisplay = () => {
+        timerDisplay.textContent = formatTime(timeLeft);
+        
+        // Dynamic Font Sizing for very long times (HH:MM:SS) on mobile
+        // If the text is long (8 chars), slightly reduce font on mobile to prevent wrapping
+        if (timerDisplay.textContent.length > 5) {
+             if (window.innerWidth < 600) {
+                 timerDisplay.style.fontSize = "13vw";
+             } else {
+                 timerDisplay.style.fontSize = ""; // Reset to CSS default
+             }
+        } else {
+             timerDisplay.style.fontSize = ""; // Reset
+        }
+      };
+
+      // 1. Logic for Standard Countdown
+      const runStandardTimer = () => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay();
+        } else {
+          stopTimer();
+          phaseDisplay.textContent = "Session Complete";
+        }
+      };
+
+      // 2. Logic for Breathing Patterns
+      const runBreathingTimer = () => {
+        // If current phase time is up, switch to next phase
+        if (timeLeft <= 0) {
+          breathingIndex = (breathingIndex + 1) % breathingConfig.intervals.length;
+          const stage = breathingConfig.intervals[breathingIndex];
+          timeLeft = stage.time;
+          phaseDisplay.textContent = stage.phase;
+        } else {
+          timeLeft--;
+        }
+        updateDisplay();
+      };
+
+      const startTimer = () => {
+        if (isRunning) {
+          // Pause logic
+          clearInterval(intervalId);
+          isRunning = false;
+          startBtn.innerHTML = icons.play;
+          return;
+        }
+
+        if (timeLeft <= 0 && currentModeType !== 'breathing') {
+            phaseDisplay.textContent = "Please set a duration";
+            return;
+        }
+
+        // Start logic
+        isRunning = true;
+        startBtn.innerHTML = icons.pause;
+
+        intervalId = setInterval(() => {
+          if (currentModeType === 'breathing') {
+            runBreathingTimer();
+          } else {
+            runStandardTimer();
+          }
+        }, 1000);
+      };
+
+      const stopTimer = () => {
+        clearInterval(intervalId);
+        isRunning = false;
+        startBtn.innerHTML = icons.play;
+      };
+
+      const resetTimer = () => {
+        stopTimer();
+        timeLeft = 0;
+        breathingIndex = 0;
+        breathingConfig = null;
+        currentModeType = null;
+        updateDisplay();
+        phaseDisplay.textContent = "Select a practice";
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      };
+
+      // --- EVENT LISTENERS ---
+
+      // 1. Preset Buttons (Breathing & Fixed Time)
+      presetButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          resetTimer(); // Reset previous state first
+          
+          // Highlight active button
+          btn.classList.add('active');
+
+          const type = btn.getAttribute('data-type');
+          
+          if (type === 'breathing') {
+            currentModeType = 'breathing';
+            const mode = btn.getAttribute('data-mode');
+            breathingConfig = techniques[mode];
+            phaseDisplay.textContent = "Get Ready: " + breathingConfig.name;
+            
+            // Initialize first phase immediately for display
+            breathingIndex = 0;
+            timeLeft = breathingConfig.intervals[0].time;
+            phaseDisplay.textContent = breathingConfig.intervals[0].phase;
+            updateDisplay();
+          } 
+          else if (type === 'timer') {
+            currentModeType = 'timer';
+            const time = parseInt(btn.getAttribute('data-time'));
+            timeLeft = time;
+            phaseDisplay.textContent = btn.innerText + " Timer";
+            updateDisplay();
+          }
+        });
+      });
+
+      // 2. Custom Hours Button
+      setCustomBtn.addEventListener('click', () => {
+        const hours = parseInt(customInput.value);
+        if (!hours || hours <= 0) {
+          phaseDisplay.textContent = "Enter valid hours";
+          return;
+        }
+
+        resetTimer();
+        setCustomBtn.classList.add('active');
+
+        currentModeType = 'timer';
+        // Convert hours to seconds
+        timeLeft = hours * 3600; 
+        
+        phaseDisplay.textContent = `${hours} Hour Timer`;
+        updateDisplay();
+      });
+
+      // 3. Control Buttons
+      startBtn.addEventListener('click', startTimer);
+      resetBtn.addEventListener('click', resetTimer);
+      
+      // Handle Window Resize to fix font size if needed
+      window.addEventListener('resize', updateDisplay);
+    });
+  </script>
 </body>
 </html>
