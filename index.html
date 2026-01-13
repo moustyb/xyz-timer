@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zen Timer</title>
+  <title>XYZ Timer</title>
   <style>
     /* --- CSS STYLES --- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,13 +22,12 @@
     .container { 
       text-align: center; 
       width: 100%;
-      /* Increased max-width to let the huge numbers fit */
       max-width: 1000px; 
       padding: 1rem; 
     }
 
     .timer {
-      /* UPDATED: Even larger font size */
+      /* Massive font size */
       font-size: 14rem; 
       font-weight: 200; 
       line-height: 1;
@@ -42,7 +41,7 @@
       font-size: 1.5rem;
       margin-bottom: 1rem;
       color: #a0a0a0;
-      min-height: 2rem;
+      min-height: 2rem; 
       text-transform: uppercase;
       letter-spacing: 2px;
       font-size: 1rem;
@@ -61,7 +60,7 @@
       background: rgba(30, 35, 45, 0.7);
       border: 1px solid rgba(60, 70, 90, 0.5);
       color: #c0c0c0;
-      padding: 1rem 1.8rem; /* Slightly larger clickable area */
+      padding: 1rem 1.8rem; 
       border-radius: 30px;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -131,7 +130,6 @@
 
     /* Responsive Adjustments */
     @media (max-width: 768px) {
-      /* Massive sizing for mobile */
       .timer { 
         font-size: 28vw; 
       }
@@ -179,7 +177,6 @@
   </div>
 
   <script>
-    // --- JAVASCRIPT LOGIC ---
     document.addEventListener('DOMContentLoaded', () => {
       const timerDisplay = document.getElementById('timer');
       const phaseDisplay = document.getElementById('phase');
@@ -193,13 +190,11 @@
       let timeLeft = 0;
       let isRunning = false;
       
-      // Icons
       const icons = {
         play: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
         pause: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 19H6V5h8v14zM8 7v10h4V7H8z"/></svg>`
       };
 
-      // Helper: Format Seconds into HH:MM:SS or MM:SS
       const formatTime = (totalSeconds) => {
         const h = Math.floor(totalSeconds / 3600);
         const m = Math.floor((totalSeconds % 3600) / 60);
@@ -214,10 +209,10 @@
       const updateDisplay = () => {
         timerDisplay.textContent = formatTime(timeLeft);
         
-        // Auto-resize font for extremely long strings (like HH:MM:SS) on small screens
+        // Auto-resize font for extremely long strings on small screens
         if (timerDisplay.textContent.length > 5) {
              if (window.innerWidth < 600) {
-                 timerDisplay.style.fontSize = "18vw"; // Shrink slightly if hours are shown
+                 timerDisplay.style.fontSize = "18vw"; 
              } else {
                  timerDisplay.style.fontSize = ""; 
              }
@@ -247,6 +242,10 @@
         if (timeLeft <= 0) {
             phaseDisplay.textContent = "Please set a duration";
             return;
+        }
+
+        if (phaseDisplay.textContent === "Please set a duration") {
+            phaseDisplay.textContent = "";
         }
 
         isRunning = true;
@@ -281,7 +280,10 @@
 
           const time = parseInt(btn.getAttribute('data-time'));
           timeLeft = time;
-          phaseDisplay.textContent = btn.innerText + " Timer";
+          
+          // Sets the top text to EXACTLY what the button says (e.g. "10 Min")
+          phaseDisplay.textContent = btn.innerText;
+          
           updateDisplay();
         });
       });
@@ -297,10 +299,9 @@
         resetTimer();
         setCustomBtn.classList.add('active');
 
-        // Convert hours to seconds
         timeLeft = hours * 3600; 
         
-        phaseDisplay.textContent = `${hours} Hour Timer`;
+        phaseDisplay.textContent = `${hours} Hours`;
         updateDisplay();
       });
 
